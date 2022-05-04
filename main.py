@@ -4,7 +4,7 @@ from kivymd.uix.label import MDLabel
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivy.uix.scrollview import ScrollView
 from kivymd.uix.screen import MDScreen
-from kivy.properties import ListProperty,BooleanProperty
+from kivy.properties import ListProperty,BooleanProperty,ColorProperty,NumericProperty
 from kivymd.uix.label import MDIcon
 from kivy.metrics import dp
 kv = '''
@@ -22,7 +22,6 @@ kv = '''
             header:[False,'teste','lola','teste','lola','teste']
 
 <SWTable>:
-    md_bg_color:0,0,1,1
     ScrollView:
         effect_cls:'ScrollEffect'
         MDBoxLayout:
@@ -30,6 +29,7 @@ kv = '''
             orientation:'vertical'
             MDBoxLayout:
                 adaptive_height:True
+                md_bg_color:root.lines_color
                 MDBoxLayout:
                     id:header
                     adaptive_size:True
@@ -50,15 +50,17 @@ class SWRowTable(MDBoxLayout):
     check = BooleanProperty(None)
     columns = ListProperty([])
     sizes = ListProperty([])
+    table_color = ColorProperty([1,1,1,1])
+    line_color = ColorProperty([0,0,0,1])
     def on_columns(self,obj,data):
         self.clear_widgets()
-        self.md_bg_color = [1,0,0,1]
+        self.md_bg_color = self.line_color
         self.spacing = dp(1)
         for index,text in enumerate(self.columns):
             if self.check != None and index == 0:
                 self.add_widget(MDIcon(
                     icon='checkbox-intermediate' if self.check else 'checkbox-blank-outline',
-                    md_bg_color=[1,1,1,1],
+                    md_bg_color=self.table_color,
                     size_hint_x=None,
                     width=dp(30),
                     pos_hint={'center_y':0.5,'center_x':0.5}))
@@ -68,13 +70,14 @@ class SWRowTable(MDBoxLayout):
                 size=self.sizes[index],
                 halign='center',
                 pos_hint={'center_y':0.5,'center_x':0.5},
-                md_bg_color=[1,1,1,1]
+                md_bg_color=self.table_color
                 ))
 
 class SWTable(MDBoxLayout):
     header = ListProperty([])
     data = ListProperty([])
     sizes = ListProperty([])
+    lines_color = ColorProperty([0,0,0,1])
     def on_data(self,obj,data):
         self.ids.table.data = data
 
@@ -85,6 +88,8 @@ class SWTable(MDBoxLayout):
         head.sizes = self.sizes
         head.size_hint_y = None
         head.height = self.sizes[0][1]
+        head.table_color = [1,0,0,1]
+        head.line_color = self.lines_color
         if header[0] in (True, False):
             self.ids.table.width = sum(x for x,y in self.sizes)+dp(30)
             head.check = False
